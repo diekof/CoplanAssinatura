@@ -24,20 +24,22 @@ import javax.imageio.ImageIO;
 
 public class CoplanAssinatura {
 
-    public static String NomeAssinador = "Gextec - Gextec Tecnologia";
-    public static String Localizacao = "";
-    public static String txtReason = "";
-    public static Boolean isCarimbo = true;
-    public static String UrlLogoGovbr = "https://www.gov.br/++theme++padrao_govbr/img/govbr-colorido-b.png";
+    public static String NomeAssinador  = "Gextec - Gextec Tecnologia";
+    public static String Localizacao    = "";
+    public static String txtReason      = "";
+    public static Boolean isCarimbo     = true;
+    public static String UrlLogoGovbr   = "https://www.gov.br/++theme++padrao_govbr/img/govbr-colorido-b.png";
     
     public static void geraAssinaturaDocumento(String caminhoPdf, String caminhoAssinado) throws IOException{
 
         FileInputStream signedFileInputStream = new FileInputStream(new File(caminhoPdf));
+        
         //Criar um dicionário de assinatura:
         PDDocument pdfDocument = PDDocument.load(new File(caminhoPdf));
-
+        
+        //Pegando a pagina 1
         PDPage pagina = pdfDocument.getPage(1);
-
+        
         //Criar um dicionário de assinatura:
         PDSignature signature = new PDSignature();
         signature.setFilter(PDSignature.FILTER_ADOBE_PPKLITE);
@@ -46,6 +48,7 @@ public class CoplanAssinatura {
         signature.setLocation(Localizacao);
         signature.setReason(txtReason);
         signature.setSignDate(Calendar.getInstance());
+        
         if(isCarimbo){
             float larguraPagina = pagina.getMediaBox().getWidth();
             float alturaPagina = pagina.getMediaBox().getHeight();
@@ -81,6 +84,7 @@ public class CoplanAssinatura {
                 contentStream.close();
             }
         }
+        
         //Adicionar o dicionário de assinatura ao documento:
         pdfDocument.addSignature(signature);
         FileOutputStream  fos = new FileOutputStream(new File(caminhoAssinado));
@@ -88,6 +92,7 @@ public class CoplanAssinatura {
         pdfDocument.close();
 
     }
+    
     public static String getSha256Assinatura(String caminho) throws IOException, EncoderException {
 
         //Carregar o arquivo PDF e criar um objeto PDDocument:
@@ -114,6 +119,7 @@ public class CoplanAssinatura {
         return sha256hex;
 
     }
+    
     public static void assinarDocumento(String caminhoAssinado,String hexadecimal) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
         FileInputStream fis = new FileInputStream(new File(caminhoAssinado));
         byte[] content = IOUtils.toByteArray(fis);
@@ -137,4 +143,5 @@ public class CoplanAssinatura {
         document.close();
 
     }
+
 }
