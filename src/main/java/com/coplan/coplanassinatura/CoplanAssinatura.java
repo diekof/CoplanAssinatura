@@ -2,6 +2,7 @@ package com.coplan.coplanassinatura;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -13,7 +14,10 @@ import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationRubberStamp;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceStream;
@@ -25,10 +29,13 @@ import javax.imageio.ImageIO;
 public class CoplanAssinatura {
 
     public static String NomeAssinador  = "Gextec - Gextec Tecnologia";
-    public static String Localizacao    = "";
-    public static String txtReason      = "";
+    public static String Localizacao    = "Central";
+    public static String txtReason      = "CPF";
     public static Boolean isCarimbo     = true;
     public static String UrlLogoGovbr   = "https://www.gov.br/++theme++padrao_govbr/img/govbr-colorido-b.png";
+    public static Boolean isAssinarTodasPaginas = false;
+    public static int fontSize = 6;
+    public static String textoPadraoAssinatura = "Documento Assinado Digitalmente";
     
     public static void geraAssinaturaDocumento(String caminhoPdf, String caminhoAssinado) throws IOException{
 
@@ -36,10 +43,7 @@ public class CoplanAssinatura {
         
         //Criar um dicionário de assinatura:
         PDDocument pdfDocument = PDDocument.load(new File(caminhoPdf));
-        
-        //Pegando a pagina 1
-        PDPage pagina = pdfDocument.getPage(1);
-        
+
         //Criar um dicionário de assinatura:
         PDSignature signature = new PDSignature();
         signature.setFilter(PDSignature.FILTER_ADOBE_PPKLITE);
@@ -50,39 +54,22 @@ public class CoplanAssinatura {
         signature.setSignDate(Calendar.getInstance());
         
         if(isCarimbo){
-            float larguraPagina = pagina.getMediaBox().getWidth();
-            float alturaPagina = pagina.getMediaBox().getHeight();
 
-            float larguraCarimbo = 50; // largura do carimbo em pontos
-            float alturaCarimbo = 50; // altura do carimbo em pontos
 
-            float x = larguraPagina - larguraCarimbo - 50; // 20 pontos de margem direita
-            float y = 20; // 20 pontos de margem inferior
 
-            PDRectangle retanguloDoCarimbo = new PDRectangle(larguraCarimbo,alturaCarimbo);
-            retanguloDoCarimbo.setLowerLeftX(x);
-            retanguloDoCarimbo.setLowerLeftY(y);
-
-            PDAnnotationRubberStamp carimbo = new PDAnnotationRubberStamp();
-            carimbo.setName(NomeAssinador);
-            carimbo.setRectangle(retanguloDoCarimbo);
- 
-            pagina.getAnnotations().add(carimbo);
-
-            // Cria uma aparência para o carimbo
-            PDAppearanceStream appearanceStream = new PDAppearanceStream(pdfDocument);
-
-            URL url = new URL(UrlLogoGovbr);
-            BufferedImage img = ImageIO.read(url);
-            File file = new File("govbr.png");
-            ImageIO.write(img, "png", file);
-            PDImageXObject simboloGovBR = PDImageXObject.createFromFile(file.getAbsolutePath(), pdfDocument);
-
-            if(!simboloGovBR.isEmpty()){
-                PDPageContentStream contentStream = new PDPageContentStream(pdfDocument, pagina, PDPageContentStream.AppendMode.APPEND, true, true);
-                contentStream.drawImage(simboloGovBR, x, y, 30, 11);
-                contentStream.close();
+            if(isAssinarTodasPaginas){
+                for (PDPage pagina : pdfDocument.getPages()) {
+                    desenhaCarimbo(pdfDocument,pagina);
+                    //pagina.getAnnotations().add(desenhaCarimbo(pdfDocument,pagina));
+                }
+            }else{
+                int numeroPagina = pdfDocument.getNumberOfPages()-1;
+                //inserindo na ultima pagina.
+                PDPage pagina = pdfDocument.getPage(numeroPagina);
+                desenhaCarimbo(pdfDocument,pagina);
+                //pagina.getAnnotations().add(desenhaCarimbo(pdfDocument,pagina));
             }
+
         }
         
         //Adicionar o dicionário de assinatura ao documento:
@@ -90,6 +77,62 @@ public class CoplanAssinatura {
         FileOutputStream  fos = new FileOutputStream(new File(caminhoAssinado));
         pdfDocument.save(fos);
         pdfDocument.close();
+
+    }
+
+    private static void desenhaCarimbo(PDDocument pdfDocument, PDPage pagina) throws IOException {
+
+        float larguraPagina = pagina.getMediaBox().getWidth();
+        float alturaPagina = pagina.getMediaBox().getHeight();
+
+        float larguraCarimbo = 50; // largura do carimbo em pontos
+        float alturaCarimbo = 50; // altura do carimbo em pontos
+
+        float x = larguraPagina - larguraCarimbo - 50; // 20 pontos de margem direita
+        float y = 20; // 20 pontos de margem inferior
+
+        PDRectangle retanguloDoCarimbo = new PDRectangle(larguraCarimbo,alturaCarimbo);
+        retanguloDoCarimbo.setLowerLeftX(x);
+        retanguloDoCarimbo.setLowerLeftY(y);
+
+        PDAnnotationRubberStamp carimbo = new PDAnnotationRubberStamp();
+        carimbo.setName(NomeAssinador);
+        carimbo.setRectangle(retanguloDoCarimbo);
+
+        //desenhando a logo.
+        URL url = new URL(UrlLogoGovbr);
+        BufferedImage img = ImageIO.read(url);
+        File file = new File("govbr.png");
+        ImageIO.write(img, "png", file);
+        PDImageXObject simboloGovBR = PDImageXObject.createFromFile(file.getAbsolutePath(), pdfDocument);
+
+        if(!simboloGovBR.isEmpty()){
+            PDFont font = PDType1Font.HELVETICA_BOLD;
+            PDPageContentStream contentStream = new PDPageContentStream(pdfDocument, pagina, PDPageContentStream.AppendMode.APPEND, true, true);
+            contentStream.drawImage(simboloGovBR, x-45, y+10, 30, 11);
+
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, fontSize);
+            contentStream.newLineAtOffset(x-10, y+20);
+            contentStream.showText(textoPadraoAssinatura);
+            contentStream.endText();
+
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA, 5);
+            contentStream.newLineAtOffset(x-10, y+10);
+            contentStream.showText(txtReason);
+            contentStream.endText();
+
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA, 5);
+            contentStream.newLineAtOffset(x-10, y+15);
+            contentStream.showText(NomeAssinador);
+            contentStream.endText();
+
+            contentStream.close();
+        }
+
+//        return carimbo;
 
     }
     
