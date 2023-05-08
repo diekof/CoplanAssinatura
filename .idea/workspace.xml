@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d32f3d8c-06ef-4c1f-9dee-c1d5367dfb01" name="Changes" comment="">
+    <list default="true" id="d32f3d8c-06ef-4c1f-9dee-c1d5367dfb01" name="Changes" comment="criacao de novas features">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/coplan/coplanassinatura/CoplanAssinatura.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/coplan/coplanassinatura/CoplanAssinatura.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/test/CoplanAssinaturaTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/test/CoplanAssinaturaTest.java" afterDir="false" />
@@ -65,7 +65,19 @@
       <option name="presentableId" value="Default" />
       <updated>1678106756168</updated>
     </task>
+    <task id="LOCAL-00001" summary="criacao de novas features">
+      <created>1683297621667</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1683297621667</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="criacao de novas features" />
+    <option name="LAST_COMMIT_MESSAGE" value="criacao de novas features" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

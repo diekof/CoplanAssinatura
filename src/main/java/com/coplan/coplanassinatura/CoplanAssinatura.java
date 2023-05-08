@@ -36,6 +36,7 @@ public class CoplanAssinatura {
     public static Boolean isAssinarTodasPaginas = false;
     public static int fontSize = 6;
     public static String textoPadraoAssinatura = "Documento Assinado Digitalmente";
+    public static PDFont fontNegrito = PDType1Font.HELVETICA_BOLD;
     
     public static void geraAssinaturaDocumento(String caminhoPdf, String caminhoAssinado) throws IOException{
 
@@ -107,24 +108,24 @@ public class CoplanAssinatura {
         PDImageXObject simboloGovBR = PDImageXObject.createFromFile(file.getAbsolutePath(), pdfDocument);
 
         if(!simboloGovBR.isEmpty()){
-            PDFont font = PDType1Font.HELVETICA_BOLD;
+
             PDPageContentStream contentStream = new PDPageContentStream(pdfDocument, pagina, PDPageContentStream.AppendMode.APPEND, true, true);
             contentStream.drawImage(simboloGovBR, x-45, y+10, 30, 11);
 
             contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA_BOLD, fontSize);
+            contentStream.setFont(fontNegrito, fontSize);
             contentStream.newLineAtOffset(x-10, y+20);
             contentStream.showText(textoPadraoAssinatura);
             contentStream.endText();
 
             contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA, 5);
+            contentStream.setFont(PDType1Font.HELVETICA, fontSize-1);
             contentStream.newLineAtOffset(x-10, y+10);
             contentStream.showText(txtReason);
             contentStream.endText();
 
             contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA, 5);
+            contentStream.setFont(PDType1Font.HELVETICA, fontSize-1);
             contentStream.newLineAtOffset(x-10, y+15);
             contentStream.showText(NomeAssinador);
             contentStream.endText();
