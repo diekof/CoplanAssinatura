@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.coplan</groupId>
   <artifactId>CoplanAssinatura</artifactId>
-  <version>05.2023.004</version>
+  <version>05.2023.015</version>
   <packaging>jar</packaging>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -37,6 +37,7 @@ public class CoplanAssinatura {
     public static int fontSize = 6;
     public static String textoPadraoAssinatura = "Documento Assinado Digitalmente";
     public static PDFont fontNegrito = PDType1Font.HELVETICA_BOLD;
+    public static int NumeroAssinatura = 0;
     
     public static void geraAssinaturaDocumento(String caminhoPdf, String caminhoAssinado) throws IOException{
 
@@ -55,8 +56,6 @@ public class CoplanAssinatura {
         signature.setSignDate(Calendar.getInstance());
         
         if(isCarimbo){
-
-
 
             if(isAssinarTodasPaginas){
                 for (PDPage pagina : pdfDocument.getPages()) {
@@ -89,7 +88,7 @@ public class CoplanAssinatura {
         float larguraCarimbo = 50; // largura do carimbo em pontos
         float alturaCarimbo = 50; // altura do carimbo em pontos
 
-        float x = larguraPagina - larguraCarimbo - 50; // 20 pontos de margem direita
+        float x = 50+larguraCarimbo+(80*NumeroAssinatura);//(larguraPagina - larguraCarimbo - 50)*NumeroAssinatura; // 20 pontos de margem direita
         float y = 20; // 20 pontos de margem inferior
 
         PDRectangle retanguloDoCarimbo = new PDRectangle(larguraCarimbo,alturaCarimbo);
@@ -132,8 +131,6 @@ public class CoplanAssinatura {
 
             contentStream.close();
         }
-
-//        return carimbo;
 
     }
     
