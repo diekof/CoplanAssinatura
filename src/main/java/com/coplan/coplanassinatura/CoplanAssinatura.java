@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
@@ -34,10 +35,11 @@ public class CoplanAssinatura {
     public static Boolean isCarimbo     = true;
     public static String UrlLogoGovbr   = "https://www.gov.br/++theme++padrao_govbr/img/govbr-colorido-b.png";
     public static Boolean isAssinarTodasPaginas = false;
-    public static int fontSize = 6;
+    public static int fontSize = 4;
     public static String textoPadraoAssinatura = "Documento Assinado Digitalmente";
     public static PDFont fontNegrito = PDType1Font.HELVETICA_BOLD;
     public static int NumeroAssinatura = 0;
+    public static int tipoAssinaura =1; //1 - govbr; 2 - manual
     
     public static void geraAssinaturaDocumento(String caminhoPdf, String caminhoAssinado) throws IOException{
 
@@ -64,10 +66,8 @@ public class CoplanAssinatura {
                 }
             }else{
                 int numeroPagina = pdfDocument.getNumberOfPages()-1;
-                //inserindo na ultima pagina.
                 PDPage pagina = pdfDocument.getPage(numeroPagina);
                 desenhaCarimbo(pdfDocument,pagina);
-                //pagina.getAnnotations().add(desenhaCarimbo(pdfDocument,pagina));
             }
 
         }
@@ -88,7 +88,11 @@ public class CoplanAssinatura {
         float larguraCarimbo = 50; // largura do carimbo em pontos
         float alturaCarimbo = 50; // altura do carimbo em pontos
 
-        float x = 50+larguraCarimbo+(80*NumeroAssinatura);//(larguraPagina - larguraCarimbo - 50)*NumeroAssinatura; // 20 pontos de margem direita
+        float x = 50+larguraCarimbo;//(larguraPagina - larguraCarimbo - 50)*NumeroAssinatura; // 20 pontos de margem direita
+        if (NumeroAssinatura>0){
+            x = x+(110*NumeroAssinatura);
+        }
+         
         float y = 20; // 20 pontos de margem inferior
 
         PDRectangle retanguloDoCarimbo = new PDRectangle(larguraCarimbo,alturaCarimbo);
@@ -99,39 +103,79 @@ public class CoplanAssinatura {
         carimbo.setName(NomeAssinador);
         carimbo.setRectangle(retanguloDoCarimbo);
 
-        //desenhando a logo.
-        URL url = new URL(UrlLogoGovbr);
-        BufferedImage img = ImageIO.read(url);
-        File file = new File("govbr.png");
-        ImageIO.write(img, "png", file);
-        PDImageXObject simboloGovBR = PDImageXObject.createFromFile(file.getAbsolutePath(), pdfDocument);
+        if(tipoAssinaura==1) {
 
-        if(!simboloGovBR.isEmpty()){
+            //desenhando a logo.
+            URL url = new URL(UrlLogoGovbr);
+            BufferedImage img = ImageIO.read(url);
+            File file = new File("govbr.png");
+            ImageIO.write(img, "png", file);
+            PDImageXObject simboloGovBR = PDImageXObject.createFromFile(file.getAbsolutePath(), pdfDocument);
+
+            if (!simboloGovBR.isEmpty()) {
+
+                SimpleDateFormat format_ = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss - zzz");
+
+                PDPageContentStream contentStream = new PDPageContentStream(pdfDocument, pagina, PDPageContentStream.AppendMode.APPEND, true, true);
+                contentStream.drawImage(simboloGovBR, x - 45, y + 10, 30, 11);
+
+                contentStream.beginText();
+                contentStream.setFont(PDType1Font.HELVETICA, fontSize - 2);
+                contentStream.newLineAtOffset(x - 10, y + 20);
+                contentStream.showText(textoPadraoAssinatura);
+                contentStream.endText();
+
+                contentStream.beginText();
+                contentStream.setFont(PDType1Font.HELVETICA, fontSize - 1);
+                contentStream.newLineAtOffset(x - 10, y + 10);
+                contentStream.showText(txtReason);
+                contentStream.endText();
+
+                contentStream.beginText();
+                contentStream.setFont(fontNegrito, fontSize);
+                contentStream.newLineAtOffset(x - 10, y + 15);
+                contentStream.showText(NomeAssinador);
+                contentStream.endText();
+
+                contentStream.beginText();
+                contentStream.setFont(PDType1Font.HELVETICA, fontSize - 1);
+                contentStream.newLineAtOffset(x - 10, y + 5);
+                contentStream.showText("Data: " + format_.format(Calendar.getInstance().getTime()));
+                contentStream.endText();
+
+                contentStream.close();
+            }
+        }else{
+            SimpleDateFormat format_ = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss - zzz");
 
             PDPageContentStream contentStream = new PDPageContentStream(pdfDocument, pagina, PDPageContentStream.AppendMode.APPEND, true, true);
-            contentStream.drawImage(simboloGovBR, x-45, y+10, 30, 11);
 
             contentStream.beginText();
-            contentStream.setFont(fontNegrito, fontSize);
-            contentStream.newLineAtOffset(x-10, y+20);
+            contentStream.setFont(PDType1Font.HELVETICA, fontSize - 2);
+            contentStream.newLineAtOffset(x - 10, y + 20);
             contentStream.showText(textoPadraoAssinatura);
             contentStream.endText();
 
             contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA, fontSize-1);
-            contentStream.newLineAtOffset(x-10, y+10);
+            contentStream.setFont(PDType1Font.HELVETICA, fontSize - 1);
+            contentStream.newLineAtOffset(x - 10, y + 10);
             contentStream.showText(txtReason);
             contentStream.endText();
 
             contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA, fontSize-1);
-            contentStream.newLineAtOffset(x-10, y+15);
+            contentStream.setFont(fontNegrito, fontSize);
+            contentStream.newLineAtOffset(x - 10, y + 15);
             contentStream.showText(NomeAssinador);
+            contentStream.endText();
+
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA, fontSize - 1);
+            contentStream.newLineAtOffset(x - 10, y + 5);
+            contentStream.showText("Data: " + format_.format(Calendar.getInstance().getTime()));
             contentStream.endText();
 
             contentStream.close();
         }
-
     }
     
     public static String getSha256Assinatura(String caminho) throws IOException, EncoderException {
